@@ -1,53 +1,52 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# Inicializar FastAPI
-app = FastAPI()
+# Configuración de la base de datos
+DATABASE_URL = "mysql+mysqlconnector://root:mysql@db:3306/ecommerce_db"
 
-# Configuración de la base de datos MySQL
-DATABASE_URL = "mysql+mysqlconnector://root:password@3.217.247.83:3306/ecommerce_db"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# Modelo Producto
-class Producto(Base):
-    __tablename__ = "productos"
-    id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(100))
-    descripcion = Column(String(255))
-    precio = Column(Integer)
-    stock = Column(Integer)
+# Definición del modelo de Producto
+class Product(Base):
+    __tablename__ = "products"
 
-# Crear las tablas en la base de datos
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), index=True)
+    description = Column(String(255))
+    price = Column(Integer)
+
+# Creación de la base de datos
 Base.metadata.create_all(bind=engine)
 
-# Esquema Pydantic para los productos
-class ProductoSchema(BaseModel):
-    nombre: str
-    descripcion: str
-    precio: int
-    stock: int
+# Inicia FastAPI
+app = FastAPI()
 
-    class Config:
-        orm_mode = True
+# Clase para manejar la creación de productos
+class ProductCreate(BaseModel):
+    name: str
+    description: str
+    price: int
 
 # Ruta para crear un producto
-@app.post("/productos/", response_model=ProductoSchema)
-def crear_producto(producto: ProductoSchema):
+@app.post("/products/")
+def create_product(product: ProductCreate):
     db = SessionLocal()
-    db_producto = Producto(**producto.dict())
-    db.add(db_producto)
+    db_product = Product(name=product.name, description=product.description, price=product.price)
+    db.add(db_product)
     db.commit()
-    db.refresh(db_producto)
-    return db_producto
+    db.refresh(db_product)
+    db.close()
+    return db_product
 
 # Ruta para obtener todos los productos
-@app.get("/productos/")
-def obtener_productos():
+@app.get("/products/")
+def get_products():
     db = SessionLocal()
-    productos = db.query(Producto).all()
-    return productos
+    products = db.query(Product).all()
+    db.close()
+    return products
