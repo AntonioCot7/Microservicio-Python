@@ -53,14 +53,14 @@ class ProductoSchema(BaseModel):
     categoria_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Esquema Pydantic para categorías
 class CategoriaSchema(BaseModel):
     nombre: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 # Dependencia para obtener la sesión de la base de datos
 def get_db():
