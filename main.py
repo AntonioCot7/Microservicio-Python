@@ -10,7 +10,7 @@ from sqlalchemy.orm import sessionmaker, relationship
 app = FastAPI()
 
 # Configuración de la base de datos MySQL
-DATABASE_URL = "mysql+mysqlconnector://root:mysql@3.217.247.83:3306/ecommerce_db"
+DATABASE_URL = "mysql+mysqlconnector://root:mysql@db:3306/ecommerce_db"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -140,3 +140,7 @@ def crear_categoria(categoria: CategoriaSchema, db: SessionLocal = Depends(get_d
     db.commit()
     db.refresh(db_categoria)
     return db_categoria
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8005)
