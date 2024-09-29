@@ -1,5 +1,6 @@
+boto3
+python-multipart
+sqlalchemy
 fastapi
 uvicorn
-pydantic
 mysql-connector-python
-sqlalchemy
